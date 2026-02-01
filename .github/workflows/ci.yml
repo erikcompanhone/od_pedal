@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure (Ninja Multi-Config)
+        run: cmake -S . -B build -G "Ninja Multi-Config"
+
+      - name: Build (Release)
+        run: cmake --build build --config Release --parallel
+
+      - name: Upload artifact (VST3)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ODPedal-vst3-windows
+          path: |
+            build/**/ODPedal.vst3/**
