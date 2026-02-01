@@ -10,6 +10,13 @@ A professional-quality VST3 guitar overdrive pedal plugin built with JUCE 8.x an
 - **Modular DSP design** for reuse in future pedal chain projects
 - **Production-ready structure** with clean separation of concerns
 
+## Design Principles
+
+- **DSP Decoupling:** Core algorithm in `OverdriveDSP` has zero JUCE dependencies for easy reuse
+- **Real-time Safe:** All memory allocations happen during `prepare()`, not in `process()`
+- **Automation Ready:** All parameters integrated with APVTS for DAW automation support
+- **Scalable:** Structure supports future expansion to multi-effect chain
+
 ## Build Requirements
 
 - **Windows 10+** with MSVC 2019+ or Clang
@@ -38,13 +45,6 @@ cmake --build build --config Release --parallel
 # VST3 plugin will be at:
 # build/ODPedal.vst3/
 ```
-
-## Design Principles
-
-- **DSP Decoupling:** Core algorithm in `OverdriveDSP` has zero JUCE dependencies for easy reuse
-- **Real-time Safe:** All memory allocations happen during `prepare()`, not in `process()`
-- **Automation Ready:** All parameters integrated with APVTS for DAW automation support
-- **Scalable:** Structure supports future expansion to multi-effect chain
 
 ## CI/CD
 
