@@ -19,9 +19,7 @@ juce_add_plugin(ODPedal
     PRODUCT_NAME "OD Pedal"
 )
 
-target_sources(ODPedal PRIVATE
-
-)
+add_subdirectory(src)
 
 target_link_libraries(ODPedal PRIVATE
     juce::juce_audio_utils
