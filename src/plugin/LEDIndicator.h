@@ -8,12 +8,15 @@ public:
     // constructor
     LEDIndicator();
 
-    // paint handler
+    // paint handler (hidden - LED is in pedal body image)
     void paint(juce::Graphics&) override;
     
     // set LED state
     void setLit(bool shouldBeLit);
 
+    // getter for LED state
+    bool isLit() const { return isLitState; }
+
 private:
-    bool isLit = false;
+    bool isLitState = false;
 };

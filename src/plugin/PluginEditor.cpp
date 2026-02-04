@@ -1,12 +1,11 @@
 # include "PluginEditor.h"
+# include "BinaryData.h"
 
 PluginEditor::PluginEditor(PluginProcessor& processorRef)
     : AudioProcessorEditor(processorRef), processor(processorRef)
 {
-    // set window size
+    // set window size (fixed, non-resizable)
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    setResizable(true, true);
-    setResizeLimits(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT, MAX_WINDOW_WIDTH, MAX_WINDOW_HEIGHT);
 
     // apply custom look and feel
     driveSlider.setLookAndFeel(&goldKnobLAF);
@@ -19,6 +18,7 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     driveSlider.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 60, 20);
     driveSlider.setRange(0.0f, 24.0f, 0.1f);
     driveSlider.setValue(0.0f);
+    driveSlider.setNumDecimalPlacesToDisplay(2);
     driveSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     driveSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
     addAndMakeVisible(driveSlider);
@@ -28,6 +28,7 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     toneSlider.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 60, 20);
     toneSlider.setRange(200.0f, 8000.0f, 1.0f);
     toneSlider.setValue(3000.0f);
+    toneSlider.setNumDecimalPlacesToDisplay(2);
     toneSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     toneSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
     addAndMakeVisible(toneSlider);
@@ -37,6 +38,7 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     levelSlider.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 60, 20);
     levelSlider.setRange(-12.0f, 12.0f, 0.1f);
     levelSlider.setValue(0.0f);
+    levelSlider.setNumDecimalPlacesToDisplay(2);
     levelSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     levelSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
     addAndMakeVisible(levelSlider);
@@ -57,13 +59,10 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     levelLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(levelLabel);
 
-    // bypass button
-    bypassButton.setButtonText("BYPASS");
+    // bypass button (no label - just image-based foot switch)
+    bypassButton.setButtonText("");
     bypassButton.setColour(juce::ToggleButton::textColourId, juce::Colours::white);
     addAndMakeVisible(bypassButton);
-
-    // led indicator
-    addAndMakeVisible(ledIndicator);
 
     // attachments
     driveAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
@@ -96,7 +95,10 @@ void PluginEditor::buttonClicked(juce::Button* button)
 {
     if (button == &bypassButton)
     {
-        ledIndicator.setLit(bypassButton.getToggleState());
+        // Update LED state: lights when bypass is OFF
+        isLit = !bypassButton.getToggleState();
+        // Repaint the editor to switch pedal body image
+        repaint();
     }
 }
 
@@ -106,18 +108,24 @@ void PluginEditor::resized()
     int windowWidth = bounds.getWidth();
     int windowHeight = bounds.getHeight();
 
-    // calculate knob size based on window width (responsive)
-    float knobSize = juce::jlimit(70.0f, 140.0f, windowWidth * 0.22f);
+    // pedal area with margin
+    int pedalX = MARGIN;
+    int pedalY = MARGIN;
+    int pedalWidth = PEDAL_WIDTH;
+    int pedalHeight = PEDAL_HEIGHT;
+
+    // calculate knob size based on pedal width
+    float knobSize = pedalWidth * 0.22f;
     float ledSize = knobSize / 3.0f;
     float buttonHeight = knobSize * 0.5f;
     float spacing = knobSize * 0.15f;
     float labelHeight = 25.0f;
 
-    // top section (drive and level knobs)
-    float topY = spacing;
-    float driveX = spacing * 2;
-    float levelX = windowWidth - driveX - knobSize;
-    float toneCentreX = (windowWidth / 2.0f) - (knobSize / 2.0f);
+    // top section (drive and level knobs) - positioned within pedal bounds
+    float topY = pedalY + spacing;
+    float driveX = pedalX + spacing * 2;
+    float levelX = pedalX + pedalWidth - spacing * 2 - knobSize;
+    float toneCentreX = pedalX + (pedalWidth / 2.0f) - (knobSize / 2.0f);
 
     // drive knob + label
     driveSlider.setBounds(driveX, topY, knobSize, knobSize);
@@ -127,27 +135,43 @@ void PluginEditor::resized()
     levelSlider.setBounds(levelX, topY, knobSize, knobSize);
     levelLabel.setBounds(levelX, topY + knobSize + spacing * 0.5f, knobSize, labelHeight);
 
-    // tone knob (centered) + label
+    // tone knob (centered) + label above knob
     float toneTopY = topY + knobSize + labelHeight + spacing * 2;
-    toneSlider.setBounds(toneCentreX, toneTopY, knobSize, knobSize);
-    toneLabel.setBounds(toneCentreX, toneTopY + knobSize + spacing * 0.5f, knobSize, labelHeight);
+    toneLabel.setBounds(toneCentreX, toneTopY, knobSize, labelHeight);
+    toneSlider.setBounds(toneCentreX, toneTopY + labelHeight + spacing * 0.5f, knobSize, knobSize);
 
-    // LED indicator (centered, below tone)
-    float ledTopY = toneTopY + knobSize + labelHeight + spacing * 3;
-    float ledX = (windowWidth / 2.0f) - (ledSize / 2.0f);
-    ledIndicator.setBounds(ledX, ledTopY, ledSize, ledSize);
+    // bypass button (centered at bottom, no label)
+    float buttonWidth = pedalWidth * 0.4f;
+    float buttonTopY = pedalY + pedalHeight - spacing * 2 - buttonHeight;
+    float buttonX = pedalX + (pedalWidth / 2.0f) - (buttonWidth / 2.0f);
+    bypassButton.setBounds(buttonX, buttonTopY, buttonWidth, buttonHeight);
+}
 
-    // bypass button (full width, below LED)
-    float buttonTopY = ledTopY + ledSize + spacing * 2;
-    bypassButton.setBounds(spacing * 2, buttonTopY, windowWidth - (spacing * 4), buttonHeight);
+
+void PluginEditor::loadPedalBodyImages()
+{
+    if (pedalBodyOnImage.isValid() && pedalBodyOffImage.isValid())
+        return;
+
+    // Load pedal body images from binary resources
+    pedalBodyOnImage = juce::ImageCache::getFromMemory(BinaryData::pedal_body_on_png, BinaryData::pedal_body_on_pngSize);
+    pedalBodyOffImage = juce::ImageCache::getFromMemory(BinaryData::pedal_body_off_png, BinaryData::pedal_body_off_pngSize);
 }
 
 void PluginEditor::paint(juce::Graphics& g)
 {
-    // dark background (like a real pedal)
+    // Dark grey background for border/margin area
     g.fillAll(juce::Colour::fromFloatRGBA(0.15f, 0.15f, 0.15f, 1.0f));
 
-    // optional: border effect
-    g.setColour(juce::Colours::black);
-    g.drawRect(getLocalBounds(), 3);
+    // Load and draw pedal body image based on LED state
+    loadPedalBodyImages();
+    auto imageToUse = isLit ? pedalBodyOnImage : pedalBodyOffImage;
+    if (imageToUse.isValid())
+    {
+        // Scale image to fit pedal bounds
+        g.drawImageWithin(imageToUse, 
+                         MARGIN, MARGIN, PEDAL_WIDTH, PEDAL_HEIGHT,
+                         juce::RectanglePlacement::stretchToFit,
+                         false);
+    }
 }

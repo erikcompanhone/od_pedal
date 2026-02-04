@@ -4,7 +4,6 @@
 # include <juce_audio_processors/juce_audio_processors.h>
 # include "PluginProcessor.h"
 # include "CustomLookAndFeel.h"
-# include "LEDIndicator.h"
 
 class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Listener
 {
@@ -28,6 +27,11 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         // processor
         PluginProcessor& processor;
 
+        // pedal body images
+        juce::Image pedalBodyOnImage;
+        juce::Image pedalBodyOffImage;
+        void loadPedalBodyImages();
+
         // sliders
         juce::Slider driveSlider;
         juce::Slider toneSlider;
@@ -41,8 +45,9 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         // bypass button
         juce::ToggleButton bypassButton;
         
-        // LED indicator
-        LEDIndicator ledIndicator;
+        // LED state tracker (LED is part of pedal body image)
+        // Initialize to true: LED lights when bypass is OFF (bypass starts OFF)
+        bool isLit = true;
 
         // attachments
         std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveAttachment;
@@ -55,10 +60,9 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         GoldButtonLookAndFeel goldButtonLAF;
 
         // layout constants
-        static constexpr int WINDOW_WIDTH = 470;
-        static constexpr int WINDOW_HEIGHT = 800;
-        static constexpr int MIN_WINDOW_WIDTH = 350;
-        static constexpr int MIN_WINDOW_HEIGHT = 600;
-        static constexpr int MAX_WINDOW_WIDTH = 600;
-        static constexpr int MAX_WINDOW_HEIGHT = 1000;
+        static constexpr int WINDOW_WIDTH = 350;
+        static constexpr int WINDOW_HEIGHT = 600;
+        static constexpr int MARGIN = 10;
+        static constexpr int PEDAL_WIDTH = 330;
+        static constexpr int PEDAL_HEIGHT = 580;
 };
