@@ -17,8 +17,11 @@ jobs:
       - name: Install Ninja
         run: choco install ninja -y
 
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Configure (Ninja Multi-Config)
-        run: cmake -S . -B build -G "Ninja Multi-Config"
+        run: cmake -S . -B build -G "Ninja Multi-Config" -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
 
       - name: Build (Release)
         run: cmake --build build --config Release --parallel

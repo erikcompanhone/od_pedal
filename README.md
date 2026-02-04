@@ -33,18 +33,22 @@ git clone --recursive https://github.com/erikcompanhone/od_pedal.git
 cd od_pedal
 ```
 
-### Configure & Build
+### Build
 
-```bash
-# Configure
-cmake -S . -B build -G "Ninja Multi-Config"
+Run the build script:
 
-# Build (Release)
-cmake --build build --config Release --parallel
-
-# VST3 plugin will be at:
-# build/ODPedal.vst3/
+```powershell
+.\build.ps1
 ```
+
+Or with a specific configuration:
+
+```powershell
+.\build.ps1 -Configuration Debug
+.\build.ps1 -Configuration Release
+```
+
+The VST3 plugin will be in `build/ODPedal_artefacts/{Configuration}/VST3/ODPedal.vst3`
 
 ## CI/CD
 
