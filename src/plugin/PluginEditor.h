@@ -22,8 +22,6 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         void buttonClicked(juce::Button* button) override;
     
     private:
-        void timerCallback();
-
         // processor
         PluginProcessor& processor;
 
@@ -65,4 +63,33 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         static constexpr int MARGIN = 10;
         static constexpr int PEDAL_WIDTH = 330;
         static constexpr int PEDAL_HEIGHT = 580;
+        
+        // knob and label sizes
+        static constexpr float DRIVE_LEVEL_KNOB_SIZE = 74.0f;
+        static constexpr float TONE_KNOB_SIZE = 62.0f;
+        static constexpr float LABEL_HEIGHT = 25.0f;
+        
+        // drive knob and label positions
+        static constexpr float DRIVE_KNOB_X = 83.0f;
+        static constexpr float DRIVE_KNOB_Y = 90.0f;
+        static constexpr float DRIVE_LABEL_X = 83.0f;
+        static constexpr float DRIVE_LABEL_Y = 201.0f;
+        
+        // level knob and label positions
+        static constexpr float LEVEL_KNOB_X = 193.0f;
+        static constexpr float LEVEL_KNOB_Y = 90.0f;
+        static constexpr float LEVEL_LABEL_X = 193.0f;
+        static constexpr float LEVEL_LABEL_Y = 201.0f;
+        
+        // tone knob and label positions
+        static constexpr float TONE_KNOB_X = 144.0f;
+        static constexpr float TONE_KNOB_Y = 185.0f;
+        static constexpr float TONE_LABEL_X = 144.0f;
+        static constexpr float TONE_LABEL_Y = 275.0f;
+        
+        // bypass button positions and size
+        static constexpr float BYPASS_BUTTON_X = 193.0f;  // (WINDOW_WIDTH/2 - 30) + 18
+        static constexpr float BYPASS_BUTTON_Y = 410.0f;
+        static constexpr float BYPASS_BUTTON_WIDTH = 60.0f;
+        static constexpr float BYPASS_BUTTON_HEIGHT = 50.0f;
 };

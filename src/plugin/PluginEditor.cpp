@@ -47,22 +47,43 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     driveLabel.setText("Drive", juce::dontSendNotification);
     driveLabel.setJustificationType(juce::Justification::centred);
     driveLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+    driveLabel.setFont(juce::Font(14.0f, juce::Font::bold));
     addAndMakeVisible(driveLabel);
 
     toneLabel.setText("Tone", juce::dontSendNotification);
     toneLabel.setJustificationType(juce::Justification::centred);
     toneLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+    toneLabel.setFont(juce::Font(14.0f, juce::Font::bold));
     addAndMakeVisible(toneLabel);
 
     levelLabel.setText("Level", juce::dontSendNotification);
     levelLabel.setJustificationType(juce::Justification::centred);
     levelLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+    levelLabel.setFont(juce::Font(14.0f, juce::Font::bold));
     addAndMakeVisible(levelLabel);
 
     // bypass button (no label - just image-based foot switch)
     bypassButton.setButtonText("");
-    bypassButton.setColour(juce::ToggleButton::textColourId, juce::Colours::white);
+    // Set button colors to fully transparent - LookAndFeel will draw images instead
+    bypassButton.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
+    bypassButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::transparentBlack);
+    bypassButton.setColour(juce::ToggleButton::textColourId, juce::Colours::transparentBlack);
+    bypassButton.setColour(juce::TextButton::textColourOffId, juce::Colours::transparentBlack);
+    bypassButton.setColour(juce::TextButton::textColourOnId, juce::Colours::transparentBlack);
+    bypassButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(bypassButton);
+
+    // Set text formatting functions BEFORE attachments
+    driveSlider.textFromValueFunction = [this](double v) {
+        return juce::String(v, 2);
+    };
+    toneSlider.textFromValueFunction = [this](double v) {
+        // Tone is in Hz (200-8000), show as integer
+        return juce::String((int)v);
+    };
+    levelSlider.textFromValueFunction = [this](double v) {
+        return juce::String(v, 2);
+    };
 
     // attachments
     driveAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
@@ -77,6 +98,22 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     bypassAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
         processor.apvts, ODPedalParameters::BYPASS_ID, bypassButton
     );
+
+    // Re-apply text formatting after attachments (in case they were overridden)
+    driveSlider.textFromValueFunction = [this](double v) {
+        return juce::String(v, 2);
+    };
+    toneSlider.textFromValueFunction = [this](double v) {
+        return juce::String((int)v);
+    };
+    levelSlider.textFromValueFunction = [this](double v) {
+        return juce::String(v, 2);
+    };
+
+    // Force immediate text update to apply formatting on startup
+    driveSlider.updateText();
+    toneSlider.updateText();
+    levelSlider.updateText();
 
     // add button listener for LED update
     bypassButton.addListener(this);
@@ -104,47 +141,25 @@ void PluginEditor::buttonClicked(juce::Button* button)
 
 void PluginEditor::resized()
 {
-    auto bounds = getLocalBounds();
-    int windowWidth = bounds.getWidth();
-    int windowHeight = bounds.getHeight();
+    // knob sizes (25% reduction from previous)
+    float knobSize = DRIVE_LEVEL_KNOB_SIZE;
+    float toneKnobSize = TONE_KNOB_SIZE;
+    float labelHeight = LABEL_HEIGHT;
 
-    // pedal area with margin
-    int pedalX = MARGIN;
-    int pedalY = MARGIN;
-    int pedalWidth = PEDAL_WIDTH;
-    int pedalHeight = PEDAL_HEIGHT;
+    // drive knob: left side
+    driveSlider.setBounds(DRIVE_KNOB_X, DRIVE_KNOB_Y, knobSize, knobSize + 50.0f);
+    driveLabel.setBounds(DRIVE_LABEL_X, DRIVE_LABEL_Y, knobSize, labelHeight);
 
-    // calculate knob size based on pedal width
-    float knobSize = pedalWidth * 0.22f;
-    float ledSize = knobSize / 3.0f;
-    float buttonHeight = knobSize * 0.5f;
-    float spacing = knobSize * 0.15f;
-    float labelHeight = 25.0f;
+    // level knob: right side
+    levelSlider.setBounds(LEVEL_KNOB_X, LEVEL_KNOB_Y, knobSize, knobSize + 50.0f);
+    levelLabel.setBounds(LEVEL_LABEL_X, LEVEL_LABEL_Y, knobSize, labelHeight);
 
-    // top section (drive and level knobs) - positioned within pedal bounds
-    float topY = pedalY + spacing;
-    float driveX = pedalX + spacing * 2;
-    float levelX = pedalX + pedalWidth - spacing * 2 - knobSize;
-    float toneCentreX = pedalX + (pedalWidth / 2.0f) - (knobSize / 2.0f);
+    // tone knob: center
+    toneSlider.setBounds(TONE_KNOB_X, TONE_KNOB_Y, toneKnobSize, toneKnobSize + 50.0f);
+    toneLabel.setBounds(TONE_LABEL_X, TONE_LABEL_Y, toneKnobSize, labelHeight);
 
-    // drive knob + label
-    driveSlider.setBounds(driveX, topY, knobSize, knobSize);
-    driveLabel.setBounds(driveX, topY + knobSize + spacing * 0.5f, knobSize, labelHeight);
-
-    // level knob + label
-    levelSlider.setBounds(levelX, topY, knobSize, knobSize);
-    levelLabel.setBounds(levelX, topY + knobSize + spacing * 0.5f, knobSize, labelHeight);
-
-    // tone knob (centered) + label above knob
-    float toneTopY = topY + knobSize + labelHeight + spacing * 2;
-    toneLabel.setBounds(toneCentreX, toneTopY, knobSize, labelHeight);
-    toneSlider.setBounds(toneCentreX, toneTopY + labelHeight + spacing * 0.5f, knobSize, knobSize);
-
-    // bypass button (centered at bottom, no label)
-    float buttonWidth = pedalWidth * 0.4f;
-    float buttonTopY = pedalY + pedalHeight - spacing * 2 - buttonHeight;
-    float buttonX = pedalX + (pedalWidth / 2.0f) - (buttonWidth / 2.0f);
-    bypassButton.setBounds(buttonX, buttonTopY, buttonWidth, buttonHeight);
+    // bypass button
+    bypassButton.setBounds(BYPASS_BUTTON_X, BYPASS_BUTTON_Y, BYPASS_BUTTON_WIDTH, BYPASS_BUTTON_HEIGHT);
 }
 
 

@@ -1,4 +1,3 @@
-# Add binary resources for images
 juce_add_binary_data(ODPedalBinaryData SOURCES
     resources/images/knob.png
     resources/images/bypass_up.png
@@ -20,6 +19,4 @@ target_sources(ODPedal PRIVATE
     plugin/PluginParameters.cpp
     plugin/CustomLookAndFeel.h
     plugin/CustomLookAndFeel.cpp
-    plugin/LEDIndicator.h
-    plugin/LEDIndicator.cpp
 )

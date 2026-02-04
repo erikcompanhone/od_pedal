@@ -17,18 +17,20 @@ void GoldKnobLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int 
 {
     loadKnobImage();
 
-    auto centreX = (float)x + (float)width * 0.5f;
-    auto centreY = (float)y + (float)height * 0.5f;
+    // Use uniform square dimensions to prevent stretching
+    float uniformSize = (float)juce::jmin(width, height);
+    auto centreX = (float)x + (float)uniformSize * 0.5f;
+    auto centreY = (float)y + (float)uniformSize * 0.5f;
 
     if (knobImage.isValid())
     {
         // Calculate rotation angle
         auto angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
 
-        // Draw rotated knob image
+        // Draw rotated knob image with uniform scaling
         g.drawImageTransformed(knobImage,
                               juce::AffineTransform::translation(-knobImage.getWidth() / 2.0f, -knobImage.getHeight() / 2.0f)
-                                  .scaled(width / (float)knobImage.getWidth(), height / (float)knobImage.getHeight())
+                                  .scaled(uniformSize / (float)knobImage.getWidth())
                                   .rotated(angle, 0.0f, 0.0f)
                                   .translated(centreX, centreY),
                               false);
@@ -87,18 +89,12 @@ void GoldButtonLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button
     }
     else
     {
-        // Fallback: draw placeholder button if images fail to load
-        auto baseColour = juce::Colour::fromFloatRGBA(0.2f, 0.2f, 0.2f, 1.0f);
+        // Fallback: draw placeholder button if images fail to load - draws a colored outline to show button area
+        auto baseColour = juce::Colour::fromFloatRGBA(0.5f, 0.2f, 0.2f, 0.5f); // Red-ish for debugging
 
-        if (isButtonDown)
-            g.setColour(baseColour.darker(0.2f));
-        else if (isMouseOverButton)
-            g.setColour(baseColour.brighter(0.1f));
-        else
-            g.setColour(baseColour);
-
+        g.setColour(baseColour);
         g.fillRoundedRectangle(bounds, 8.0f);
-        g.setColour(juce::Colours::darkgrey);
+        g.setColour(juce::Colours::white);
         g.drawRoundedRectangle(bounds, 8.0f, 2.0f);
     }
 }
