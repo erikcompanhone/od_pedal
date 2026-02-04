@@ -88,8 +88,8 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         static constexpr float TONE_LABEL_Y = 275.0f;
         
         // bypass button positions and size
-        static constexpr float BYPASS_BUTTON_X = 193.0f;  // (WINDOW_WIDTH/2 - 30) + 18
-        static constexpr float BYPASS_BUTTON_Y = 410.0f;
+        static constexpr float BYPASS_BUTTON_X = 145.0f;  // Centered in pedal
+        static constexpr float BYPASS_BUTTON_Y = 385.0f;  // Moved up 25px
         static constexpr float BYPASS_BUTTON_WIDTH = 60.0f;
         static constexpr float BYPASS_BUTTON_HEIGHT = 50.0f;
 };

@@ -64,7 +64,8 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
 
     // bypass button (no label - just image-based foot switch)
     bypassButton.setButtonText("");
-    // Set button colors to fully transparent - LookAndFeel will draw images instead
+    bypassButton.setClickingTogglesState(true);
+    // Set all button appearance colors to transparent
     bypassButton.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
     bypassButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::transparentBlack);
     bypassButton.setColour(juce::ToggleButton::textColourId, juce::Colours::transparentBlack);

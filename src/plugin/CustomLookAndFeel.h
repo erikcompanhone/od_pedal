@@ -22,10 +22,12 @@ public:
     // draw custom button background
     void drawButtonBackground(juce::Graphics&, juce::Button&, const juce::Colour& backgroundColour,
                              bool isMouseOverButton, bool isButtonDown) override;
+    
+    // override toggle button drawing
+    void drawToggleButton(juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
 private:
     juce::Image bypassUpImage;
-    juce::Image bypassDownImage;
     bool bypassImagesLoaded = false;
     void loadBypassImages();
 };

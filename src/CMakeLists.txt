@@ -1,7 +1,6 @@
 juce_add_binary_data(ODPedalBinaryData SOURCES
     resources/images/knob.png
     resources/images/bypass_up.png
-    resources/images/bypass_down.png
     resources/images/pedal_body_on.png
     resources/images/pedal_body_off.png
 )

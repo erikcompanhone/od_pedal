@@ -49,9 +49,8 @@ void GoldButtonLookAndFeel::loadBypassImages()
     if (bypassImagesLoaded)
         return;
 
-    // Load bypass button images from binary resources
+    // Load bypass button image from binary resources
     bypassUpImage = juce::ImageCache::getFromMemory(BinaryData::bypass_up_png, BinaryData::bypass_up_pngSize);
-    bypassDownImage = juce::ImageCache::getFromMemory(BinaryData::bypass_down_png, BinaryData::bypass_down_pngSize);
     bypassImagesLoaded = true;
 }
 
@@ -59,42 +58,36 @@ void GoldButtonLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button
                                                   const juce::Colour& backgroundColour,
                                                   bool isMouseOverButton, bool isButtonDown)
 {
+    // Not used for toggle buttons - see drawToggleButton
+}
+
+void GoldButtonLookAndFeel::drawToggleButton(juce::Graphics& g, juce::ToggleButton& button,
+                                             bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+{
+    auto bounds = button.getLocalBounds().toFloat();
+    
     loadBypassImages();
 
-    auto bounds = button.getLocalBounds().toFloat();
     auto centreX = bounds.getCentreX();
     auto centreY = bounds.getCentreY();
 
-    // Choose image based on button press state (click animation)
-    auto imageToUse = isButtonDown ? bypassDownImage : bypassUpImage;
-
-    if (imageToUse.isValid())
+    if (bypassUpImage.isValid())
     {
-        // Opacity changes on press: 100% unpressed, 85% pressed
-        float opacity = isButtonDown ? 0.85f : 1.0f;
-        
-        // Calculate scale to fit bounds
-        auto scale = juce::jmin(bounds.getWidth() / (float)imageToUse.getWidth(),
-                               bounds.getHeight() / (float)imageToUse.getHeight());
+        // Calculate scale to fit bounds, then double it for larger size, then reduce by 25%
+        auto scale = juce::jmin(bounds.getWidth() / (float)bypassUpImage.getWidth(),
+                               bounds.getHeight() / (float)bypassUpImage.getHeight()) * 2.0f * 0.75f;
 
-        // Draw button image centered with opacity
+        // Opacity changes on press: 100% unpressed, 60% pressed
+        float opacity = shouldDrawButtonAsDown ? 0.6f : 1.0f;
+
+        // Draw button image centered within button bounds
         g.saveState();
         g.setOpacity(opacity);
-        g.drawImageTransformed(imageToUse,
-                              juce::AffineTransform::translation(-imageToUse.getWidth() / 2.0f, -imageToUse.getHeight() / 2.0f)
+        g.drawImageTransformed(bypassUpImage,
+                              juce::AffineTransform::translation(-bypassUpImage.getWidth() / 2.0f, -bypassUpImage.getHeight() / 2.0f)
                                   .scaled(scale)
                                   .translated(centreX, centreY),
                               false);
         g.restoreState();
-    }
-    else
-    {
-        // Fallback: draw placeholder button if images fail to load - draws a colored outline to show button area
-        auto baseColour = juce::Colour::fromFloatRGBA(0.5f, 0.2f, 0.2f, 0.5f); // Red-ish for debugging
-
-        g.setColour(baseColour);
-        g.fillRoundedRectangle(bounds, 8.0f);
-        g.setColour(juce::Colours::white);
-        g.drawRoundedRectangle(bounds, 8.0f, 2.0f);
     }
 }
