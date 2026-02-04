@@ -9,6 +9,10 @@ param(
 Write-Host "=== OD Pedal Build ===" -ForegroundColor Cyan
 Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
 
+# Clean old build
+Write-Host "`nCleaning old build..." -ForegroundColor Cyan
+Remove-Item build -Recurse -Force -ErrorAction SilentlyContinue
+
 # Configure
 Write-Host "`nConfiguring..." -ForegroundColor Cyan
 cmake -S . -B build -G "Visual Studio 18 2026" -A x64

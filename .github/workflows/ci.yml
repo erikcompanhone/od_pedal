@@ -31,4 +31,4 @@ jobs:
         with:
           name: ODPedal-vst3-windows
           path: |
-            build/**/ODPedal.vst3/**
+            build/**/OD Pedal.vst3/**
