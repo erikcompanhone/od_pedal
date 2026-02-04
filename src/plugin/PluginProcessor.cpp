@@ -9,10 +9,6 @@ PluginProcessor::PluginProcessor()
 {
 }
 
-PluginProcessor::~PluginProcessor()
-{
-}
-
 void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     dsp.prepare(static_cast<float>(sampleRate));
