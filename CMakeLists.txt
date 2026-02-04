@@ -29,4 +29,5 @@ target_link_libraries(ODPedal PRIVATE
 target_compile_definitions(ODPedal PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
+    JUCE_VST2_VERSIONS_DEPRECATED=0
 )
