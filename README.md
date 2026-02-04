@@ -51,7 +51,38 @@ Or with a specific configuration:
 
 The VST3 plugin will be in `build/ODPedal_artefacts/{Configuration}/VST3/ODPedal.vst3`
 
-## CI/CD
+## IntelliSense Configuration
+
+VS Code may show IntelliSense errors about missing `BinaryData.h` members (e.g., `knob_png`, `bypass_up_png`, etc.) even though the project builds successfully. This is because the binary data header is generated during the CMake build process.
+
+**The errors do not affect compilation or functionality** — they're purely IntelliSense squiggles.
+
+### Fix IntelliSense Errors
+
+A `.vscode/c_cpp_properties.json` file is included in the repository that configures IntelliSense to find the generated header:
+
+```json
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/src/plugin",
+                "${workspaceFolder}/src/dsp",
+                "${workspaceFolder}/build/src/juce_binarydata_ODPedalBinaryData/JuceLibraryCode",
+                "${workspaceFolder}/third_party/JUCE/modules",
+                "${workspaceFolder}/build/ODPedal_artefacts/JuceLibraryCode"
+            ],
+            ...
+        }
+    ]
+}
+```
+
+**If you still see errors after building:**
+1. Reload VS Code (`Ctrl+Shift+P` → "Developer: Reload Window")
+2. The IntelliSense database should refresh and errors will disappear
 
 This project uses **GitHub Actions** to automatically build on every push/PR to `main`.
 

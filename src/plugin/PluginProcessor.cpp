@@ -13,7 +13,6 @@ PluginProcessor::PluginProcessor()
 void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     dsp.prepare(static_cast<float>(sampleRate));
-    DBG("Prepared to play at " << sampleRate << " Hz, block size: " << samplesPerBlock);
 }
 
 void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)

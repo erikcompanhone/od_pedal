@@ -1,52 +1,81 @@
 # include "CustomLookAndFeel.h"
+# include "BinaryData.h"
+
+void GoldKnobLookAndFeel::loadKnobImage()
+{
+    if (knobImageLoaded)
+        return;
+
+    // load knob image from binary resources
+    knobImage = juce::ImageCache::getFromMemory(BinaryData::knob_png, BinaryData::knob_pngSize);
+    knobImageLoaded = true;
+}
 
 void GoldKnobLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height,
                                            float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle,
                                            juce::Slider& slider)
 {
-    auto radius = (float)juce::jmin(width / 2, height / 2) - 4.0f;
-    auto centreX = (float)x + (float)width * 0.5f;
-    auto centreY = (float)y + (float)height * 0.5f;
-    auto rx = centreX - radius;
-    auto ry = centreY - radius;
-    auto rw = radius * 2.0f;
-    auto angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
+    loadKnobImage();
 
-    // Gold knob
-    g.setColour(juce::Colour::fromFloatRGBA(0.86f, 0.76f, 0.24f, 1.0f)); // Gold
-    g.fillEllipse(rx, ry, rw, rw);
+    // use uniform square dimensions to prevent stretching
+    float uniformSize = (float)juce::jmin(width, height);
+    auto centreX = (float)x + (float)uniformSize * 0.5f;
+    auto centreY = (float)y + (float)uniformSize * 0.5f;
+    const float KNOB_CENTRE_OFFSET_X = -knobImage.getWidth() / 2.0f;
+    const float KNOB_CENTRE_OFFSET_Y = -knobImage.getHeight() / 2.0f;
 
-    // Dark outline
-    g.setColour(juce::Colours::darkgrey);
-    g.drawEllipse(rx, ry, rw, rw, 2.0f);
+    if (knobImage.isValid())
+    {
+        // calculate rotation angle
+        auto angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
 
-    // Pointer
-    juce::Path p;
-    auto pointerLength = radius * 0.33f;
-    auto pointerThickness = 2.0f;
-    p.addRectangle(-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength);
-    p.applyTransform(juce::AffineTransform::rotation(angle, centreX, centreY));
-    g.setColour(juce::Colours::black);
-    g.fillPath(p);
+        // draw rotated knob image with uniform scaling
+        g.drawImageTransformed(knobImage,
+                              juce::AffineTransform::translation(KNOB_CENTRE_OFFSET_X, KNOB_CENTRE_OFFSET_Y)
+                                  .scaled(uniformSize / (float)knobImage.getWidth())
+                                  .rotated(angle, 0.0f, 0.0f)
+                                  .translated(centreX, centreY),
+                              false);
+    }
 }
 
-void GoldButtonLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
-                                                  const juce::Colour& backgroundColour,
-                                                  bool isMouseOverButton, bool isButtonDown)
+void GoldButtonLookAndFeel::loadBypassImages()
 {
-    auto bounds = button.getLocalBounds().toFloat().reduced(0.5f);
-    auto baseColour = juce::Colour::fromFloatRGBA(0.86f, 0.76f, 0.24f, 1.0f); // Gold
+    if (bypassImagesLoaded)
+        return;
 
-    if (isButtonDown)
-        g.setColour(baseColour.darker(0.2f));
-    else if (isMouseOverButton)
-        g.setColour(baseColour.brighter(0.1f));
-    else
-        g.setColour(baseColour);
+    // load bypass button image from binary resources
+    bypassUpImage = juce::ImageCache::getFromMemory(BinaryData::bypass_up_png, BinaryData::bypass_up_pngSize);
+    bypassImagesLoaded = true;
+}
 
-    g.fillRoundedRectangle(bounds, 8.0f);
+void GoldButtonLookAndFeel::drawToggleButton(juce::Graphics& g, juce::ToggleButton& button,
+                                             bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+{
+    auto bounds = button.getLocalBounds().toFloat();
+    
+    loadBypassImages();
 
-    // Border
-    g.setColour(juce::Colours::darkgrey);
-    g.drawRoundedRectangle(bounds, 8.0f, 2.0f);
+    auto centreX = bounds.getCentreX();
+    auto centreY = bounds.getCentreY();
+    constexpr float BYPASS_IMAGE_SCALE = 1.5f;
+    const float IMAGE_CENTRE_OFFSET_X = -bypassUpImage.getWidth() / 2.0f;
+    const float IMAGE_CENTRE_OFFSET_Y = -bypassUpImage.getHeight() / 2.0f;
+
+    if (bypassUpImage.isValid())
+    {
+        auto scale = juce::jmin(bounds.getWidth() / (float)bypassUpImage.getWidth(),
+                               bounds.getHeight() / (float)bypassUpImage.getHeight()) * BYPASS_IMAGE_SCALE;
+
+        float opacity = shouldDrawButtonAsDown ? 0.6f : 1.0f;
+
+        g.saveState();
+        g.setOpacity(opacity);
+        g.drawImageTransformed(bypassUpImage,
+                              juce::AffineTransform::translation(IMAGE_CENTRE_OFFSET_X, IMAGE_CENTRE_OFFSET_Y)
+                                  .scaled(scale)
+                                  .translated(centreX, centreY),
+                              false);
+        g.restoreState();
+    }
 }

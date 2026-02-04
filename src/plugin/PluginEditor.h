@@ -4,7 +4,6 @@
 # include <juce_audio_processors/juce_audio_processors.h>
 # include "PluginProcessor.h"
 # include "CustomLookAndFeel.h"
-# include "LEDIndicator.h"
 
 class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Listener
 {
@@ -19,14 +18,17 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         // window paint handler
         void paint (juce::Graphics& graphicsRef) override;
         
-        // button listener
+        // button listener to update LED state
         void buttonClicked(juce::Button* button) override;
     
     private:
-        void timerCallback();
-
         // processor
         PluginProcessor& processor;
+
+        // pedal body images
+        juce::Image pedalBodyOnImage;
+        juce::Image pedalBodyOffImage;
+        void loadPedalBodyImages();
 
         // sliders
         juce::Slider driveSlider;
@@ -41,8 +43,8 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         // bypass button
         juce::ToggleButton bypassButton;
         
-        // LED indicator
-        LEDIndicator ledIndicator;
+        // LED state tracker
+        bool isLit = true;
 
         // attachments
         std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveAttachment;
@@ -55,10 +57,38 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         GoldButtonLookAndFeel goldButtonLAF;
 
         // layout constants
-        static constexpr int WINDOW_WIDTH = 470;
-        static constexpr int WINDOW_HEIGHT = 800;
-        static constexpr int MIN_WINDOW_WIDTH = 350;
-        static constexpr int MIN_WINDOW_HEIGHT = 600;
-        static constexpr int MAX_WINDOW_WIDTH = 600;
-        static constexpr int MAX_WINDOW_HEIGHT = 1000;
+        static constexpr int WINDOW_WIDTH = 350;
+        static constexpr int WINDOW_HEIGHT = 600;
+        static constexpr int MARGIN = 10;
+        static constexpr int PEDAL_WIDTH = 330;
+        static constexpr int PEDAL_HEIGHT = 580;
+        
+        // knob and label sizes
+        static constexpr float DRIVE_LEVEL_KNOB_SIZE = 74.0f;
+        static constexpr float TONE_KNOB_SIZE = 62.0f;
+        static constexpr float LABEL_HEIGHT = 25.0f;
+        
+        // drive knob and label positions
+        static constexpr float DRIVE_KNOB_X = 83.0f;
+        static constexpr float DRIVE_KNOB_Y = 90.0f;
+        static constexpr float DRIVE_LABEL_X = 83.0f;
+        static constexpr float DRIVE_LABEL_Y = 201.0f;
+        
+        // level knob and label positions
+        static constexpr float LEVEL_KNOB_X = 193.0f;
+        static constexpr float LEVEL_KNOB_Y = 90.0f;
+        static constexpr float LEVEL_LABEL_X = 193.0f;
+        static constexpr float LEVEL_LABEL_Y = 201.0f;
+        
+        // tone knob and label positions
+        static constexpr float TONE_KNOB_X = 144.0f;
+        static constexpr float TONE_KNOB_Y = 185.0f;
+        static constexpr float TONE_LABEL_X = 144.0f;
+        static constexpr float TONE_LABEL_Y = 275.0f;
+        
+        // bypass button positions and size
+        static constexpr float BYPASS_BUTTON_X = 145.0f;
+        static constexpr float BYPASS_BUTTON_Y = 385.0f;
+        static constexpr float BYPASS_BUTTON_WIDTH = 60.0f;
+        static constexpr float BYPASS_BUTTON_HEIGHT = 50.0f;
 };
