@@ -28,11 +28,11 @@ class OverdriveDSP
         float outputHistory1 = 0.0f;  // y[n-1]
         float outputHistory2 = 0.0f;  // y[n-2]
         
-        // Peaking EQ coefficients
+        // peaking EQ coefficients
         float b0 = 0.0f, b1 = 0.0f, b2 = 0.0f;
         float a1 = 0.0f, a2 = 0.0f;
         
-        // Helper to calculate peaking EQ coefficients
+        // helper to calculate peaking EQ coefficients
         void updateToneCoefficients(float tone);
 
         // helper function for soft clipping
