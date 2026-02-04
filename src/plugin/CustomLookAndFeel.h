@@ -18,9 +18,6 @@ class GoldKnobLookAndFeel : public juce::LookAndFeel_V4
 class GoldButtonLookAndFeel : public juce::LookAndFeel_V4
 {
     public:
-        void drawButtonBackground(juce::Graphics&, juce::Button&, const juce::Colour& backgroundColour,
-                                bool isMouseOverButton, bool isButtonDown) override;
-        
         void drawToggleButton(juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
     private:
