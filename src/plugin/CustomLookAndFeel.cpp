@@ -21,6 +21,8 @@ void GoldKnobLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int 
     float uniformSize = (float)juce::jmin(width, height);
     auto centreX = (float)x + (float)uniformSize * 0.5f;
     auto centreY = (float)y + (float)uniformSize * 0.5f;
+    const float KNOB_CENTRE_OFFSET_X = -knobImage.getWidth() / 2.0f;
+    const float KNOB_CENTRE_OFFSET_Y = -knobImage.getHeight() / 2.0f;
 
     if (knobImage.isValid())
     {
@@ -29,18 +31,11 @@ void GoldKnobLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int 
 
         // draw rotated knob image with uniform scaling
         g.drawImageTransformed(knobImage,
-                              juce::AffineTransform::translation(-knobImage.getWidth() / 2.0f, -knobImage.getHeight() / 2.0f)
+                              juce::AffineTransform::translation(KNOB_CENTRE_OFFSET_X, KNOB_CENTRE_OFFSET_Y)
                                   .scaled(uniformSize / (float)knobImage.getWidth())
                                   .rotated(angle, 0.0f, 0.0f)
                                   .translated(centreX, centreY),
                               false);
-    }
-    else
-    {
-        // fallback: draw placeholder circle if image fails to load
-        g.setColour(juce::Colours::darkgrey);
-        auto radius = (float)juce::jmin(width / 2, height / 2);
-        g.fillEllipse(centreX - radius, centreY - radius, radius * 2.0f, radius * 2.0f);
     }
 }
 
@@ -54,16 +49,6 @@ void GoldButtonLookAndFeel::loadBypassImages()
     bypassImagesLoaded = true;
 }
 
-// goldButtonLookAndFeel: Custom rendering for bypass toggle button
-// =================================================================
-
-void GoldButtonLookAndFeel::drawButtonBackground(juce::Graphics& g, juce::Button& button,
-                                                  const juce::Colour& backgroundColour,
-                                                  bool isMouseOverButton, bool isButtonDown)
-{
-    // not used for toggle buttons - see drawToggleButton
-}
-
 void GoldButtonLookAndFeel::drawToggleButton(juce::Graphics& g, juce::ToggleButton& button,
                                              bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
@@ -73,21 +58,21 @@ void GoldButtonLookAndFeel::drawToggleButton(juce::Graphics& g, juce::ToggleButt
 
     auto centreX = bounds.getCentreX();
     auto centreY = bounds.getCentreY();
+    constexpr float BYPASS_IMAGE_SCALE = 1.5f;
+    const float IMAGE_CENTRE_OFFSET_X = -bypassUpImage.getWidth() / 2.0f;
+    const float IMAGE_CENTRE_OFFSET_Y = -bypassUpImage.getHeight() / 2.0f;
 
     if (bypassUpImage.isValid())
     {
-        // calculate scale to fit bounds, then double it for larger size, then reduce by 25%
         auto scale = juce::jmin(bounds.getWidth() / (float)bypassUpImage.getWidth(),
-                               bounds.getHeight() / (float)bypassUpImage.getHeight()) * 2.0f * 0.75f;
+                               bounds.getHeight() / (float)bypassUpImage.getHeight()) * BYPASS_IMAGE_SCALE;
 
-        // opacity changes on press: 100% unpressed, 60% pressed
         float opacity = shouldDrawButtonAsDown ? 0.6f : 1.0f;
 
-        // draw button image centered within button bounds
         g.saveState();
         g.setOpacity(opacity);
         g.drawImageTransformed(bypassUpImage,
-                              juce::AffineTransform::translation(-bypassUpImage.getWidth() / 2.0f, -bypassUpImage.getHeight() / 2.0f)
+                              juce::AffineTransform::translation(IMAGE_CENTRE_OFFSET_X, IMAGE_CENTRE_OFFSET_Y)
                                   .scaled(scale)
                                   .translated(centreX, centreY),
                               false);
