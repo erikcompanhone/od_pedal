@@ -18,7 +18,7 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         // window paint handler
         void paint (juce::Graphics& graphicsRef) override;
         
-        // button listener
+        // button listener to update LED state
         void buttonClicked(juce::Button* button) override;
     
     private:
@@ -43,8 +43,7 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         // bypass button
         juce::ToggleButton bypassButton;
         
-        // LED state tracker (LED is part of pedal body image)
-        // Initialize to true: LED lights when bypass is OFF (bypass starts OFF)
+        // LED state tracker
         bool isLit = true;
 
         // attachments
@@ -88,8 +87,8 @@ class PluginEditor : public juce::AudioProcessorEditor, public juce::Button::Lis
         static constexpr float TONE_LABEL_Y = 275.0f;
         
         // bypass button positions and size
-        static constexpr float BYPASS_BUTTON_X = 145.0f;  // Centered in pedal
-        static constexpr float BYPASS_BUTTON_Y = 385.0f;  // Moved up 25px
+        static constexpr float BYPASS_BUTTON_X = 145.0f;
+        static constexpr float BYPASS_BUTTON_Y = 385.0f;
         static constexpr float BYPASS_BUTTON_WIDTH = 60.0f;
         static constexpr float BYPASS_BUTTON_HEIGHT = 50.0f;
 };

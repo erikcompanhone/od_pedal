@@ -13,7 +13,7 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     levelSlider.setLookAndFeel(&goldKnobLAF);
     bypassButton.setLookAndFeel(&goldButtonLAF);
 
-    // drive slider
+    // sliders
     driveSlider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
     driveSlider.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 60, 20);
     driveSlider.setRange(0.0f, 24.0f, 0.1f);
@@ -23,7 +23,6 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     driveSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
     addAndMakeVisible(driveSlider);
 
-    // tone slider
     toneSlider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
     toneSlider.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 60, 20);
     toneSlider.setRange(200.0f, 8000.0f, 1.0f);
@@ -33,7 +32,6 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     toneSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
     addAndMakeVisible(toneSlider);
 
-    // level slider
     levelSlider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
     levelSlider.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 60, 20);
     levelSlider.setRange(-12.0f, 12.0f, 0.1f);
@@ -62,10 +60,9 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     levelLabel.setFont(juce::Font(14.0f, juce::Font::bold));
     addAndMakeVisible(levelLabel);
 
-    // bypass button (no label - just image-based foot switch)
+    // bypass button
     bypassButton.setButtonText("");
     bypassButton.setClickingTogglesState(true);
-    // Set all button appearance colors to transparent
     bypassButton.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
     bypassButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::transparentBlack);
     bypassButton.setColour(juce::ToggleButton::textColourId, juce::Colours::transparentBlack);
@@ -73,18 +70,6 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
     bypassButton.setColour(juce::TextButton::textColourOnId, juce::Colours::transparentBlack);
     bypassButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(bypassButton);
-
-    // Set text formatting functions BEFORE attachments
-    driveSlider.textFromValueFunction = [this](double v) {
-        return juce::String(v, 2);
-    };
-    toneSlider.textFromValueFunction = [this](double v) {
-        // Tone is in Hz (200-8000), show as integer
-        return juce::String((int)v);
-    };
-    levelSlider.textFromValueFunction = [this](double v) {
-        return juce::String(v, 2);
-    };
 
     // attachments
     driveAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
@@ -100,7 +85,7 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
         processor.apvts, ODPedalParameters::BYPASS_ID, bypassButton
     );
 
-    // Re-apply text formatting after attachments (in case they were overridden)
+    // set slider text formatting functions
     driveSlider.textFromValueFunction = [this](double v) {
         return juce::String(v, 2);
     };
@@ -111,7 +96,7 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
         return juce::String(v, 2);
     };
 
-    // Force immediate text update to apply formatting on startup
+    // force immediate text update to apply formatting on startup
     driveSlider.updateText();
     toneSlider.updateText();
     levelSlider.updateText();
@@ -133,9 +118,7 @@ void PluginEditor::buttonClicked(juce::Button* button)
 {
     if (button == &bypassButton)
     {
-        // Update LED state: lights when bypass is OFF
         isLit = !bypassButton.getToggleState();
-        // Repaint the editor to switch pedal body image
         repaint();
     }
 }
@@ -169,22 +152,22 @@ void PluginEditor::loadPedalBodyImages()
     if (pedalBodyOnImage.isValid() && pedalBodyOffImage.isValid())
         return;
 
-    // Load pedal body images from binary resources
+    // load pedal body images from binary resources
     pedalBodyOnImage = juce::ImageCache::getFromMemory(BinaryData::pedal_body_on_png, BinaryData::pedal_body_on_pngSize);
     pedalBodyOffImage = juce::ImageCache::getFromMemory(BinaryData::pedal_body_off_png, BinaryData::pedal_body_off_pngSize);
 }
 
 void PluginEditor::paint(juce::Graphics& g)
 {
-    // Dark grey background for border/margin area
+    // dark grey background
     g.fillAll(juce::Colour::fromFloatRGBA(0.15f, 0.15f, 0.15f, 1.0f));
 
-    // Load and draw pedal body image based on LED state
+    // load and draw pedal body image based on LED state
     loadPedalBodyImages();
     auto imageToUse = isLit ? pedalBodyOnImage : pedalBodyOffImage;
     if (imageToUse.isValid())
     {
-        // Scale image to fit pedal bounds
+        // scale image to fit pedal bounds
         g.drawImageWithin(imageToUse, 
                          MARGIN, MARGIN, PEDAL_WIDTH, PEDAL_HEIGHT,
                          juce::RectanglePlacement::stretchToFit,
