@@ -19,10 +19,11 @@ A professional-quality VST3 guitar overdrive pedal plugin built with JUCE 8.x an
 
 ## Build Requirements
 
-- **Windows 10+** with MSVC 2019+ or Clang
+- **Visual Studio 2026** (with C++ workload) or compatible MSVC compiler
 - **CMake 3.22+**
-- **Ninja** (for parallel builds)
 - **JUCE 8.x** (included as git submodule)
+
+**Note:** Build script uses Visual Studio 18 2026 generator. If you have a different VS version, update the `-G` flag in `build.ps1` accordingly (e.g., `"Visual Studio 17 2022"` for VS 2022).
 
 ## Building
 

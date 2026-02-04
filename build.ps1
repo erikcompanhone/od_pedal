@@ -11,7 +11,7 @@ Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
 
 # Configure
 Write-Host "`nConfiguring..." -ForegroundColor Cyan
-cmake -S . -B build -G "Ninja Multi-Config"
+cmake -S . -B build -G "Visual Studio 18 2026" -A x64
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERROR] Configuration failed" -ForegroundColor Red
     exit 1
