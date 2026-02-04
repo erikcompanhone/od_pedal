@@ -108,4 +108,3 @@ void OverdriveDSP::process(float* buffer, int numSamples, float drive, float ton
         buffer[i] = toneSample * levelLinear;
     }
 }
-

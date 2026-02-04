@@ -2,6 +2,7 @@
 
 juce::AudioProcessorValueTreeState::ParameterLayout ODPedalParameters::createParameterLayout()
 {
+    // Create the parameter layout and add parameters
     return juce::AudioProcessorValueTreeState::ParameterLayout {
         std::make_unique<juce::AudioParameterFloat> (
             juce::ParameterID { DRIVE_ID, 1 },

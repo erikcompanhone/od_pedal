@@ -6,6 +6,19 @@
 
 class OverdriveDSP
 {
+    public:
+        // constructor
+        OverdriveDSP();
+
+        // prepare the DSP with the given sample rate
+        void prepare(float sampleRate);
+
+        // audio processing loop
+        void process(float* buffer, int numSamples, float drive, float tone, float level);
+
+        // reset the DSP state
+        void reset();
+
     private:
         // DSP state variables
         float sampleRate = 44100.0f;
@@ -24,17 +37,4 @@ class OverdriveDSP
 
         // helper function for soft clipping
         float softClip(float input);
-
-    public:
-        // constructor
-        OverdriveDSP();
-
-        // prepare the DSP with the given sample rate
-        void prepare(float sampleRate);
-
-        // audio processing loop
-        void process(float* buffer, int numSamples, float drive, float tone, float level);
-
-        // reset the DSP state
-        void reset();
 };
