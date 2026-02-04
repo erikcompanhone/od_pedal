@@ -7,4 +7,8 @@ target_sources(ODPedal PRIVATE
     plugin/PluginEditor.cpp
     plugin/PluginParameters.h
     plugin/PluginParameters.cpp
+    plugin/CustomLookAndFeel.h
+    plugin/CustomLookAndFeel.cpp
+    plugin/LEDIndicator.h
+    plugin/LEDIndicator.cpp
 )

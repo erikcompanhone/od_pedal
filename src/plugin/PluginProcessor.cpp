@@ -28,6 +28,11 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiB
     float* outputChannelPtr = buffer.getWritePointer(0);
     int numSamples = buffer.getNumSamples();
 
+    // read bypass parameter
+    bool isBypassed = apvts.getRawParameterValue(ODPedalParameters::BYPASS_ID)->load() > 0.5f;
+    if (isBypassed)
+        return;
+
     // read params
     float drive = apvts.getRawParameterValue(ODPedalParameters::DRIVE_ID)->load();
     float tone = apvts.getRawParameterValue(ODPedalParameters::TONE_ID)->load();

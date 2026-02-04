@@ -21,6 +21,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout ODPedalParameters::createPar
             LEVEL_NAME,
             juce::NormalisableRange<float> { -12.0f, 12.0f }, 0.0f,
             juce::AudioParameterFloatAttributes().withLabel ("dB")
+        ),
+        std::make_unique<juce::AudioParameterBool> (
+            juce::ParameterID { BYPASS_ID, 1 },
+            BYPASS_NAME,
+            false
         )
     };
 }
