@@ -4,6 +4,9 @@
 # include "../dsp/OverdriveDSP.h"
 # include "PluginParameters.h"
 
+// forward declaration
+class PluginEditor;
+
 class PluginProcessor : public juce::AudioProcessor
 {
     public:
@@ -39,6 +42,16 @@ class PluginProcessor : public juce::AudioProcessor
         bool acceptsMidi() const override;
         bool producesMidi() const override;
         bool isMidiEffect() const override;
+
+        // bus layout
+        bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
+
+        // editor
+        bool hasEditor() const override;
+        juce::AudioProcessorEditor* createEditor() override;
+
+        // tail
+        double getTailLengthSeconds() const override;
 
     private:
         // DSP instance

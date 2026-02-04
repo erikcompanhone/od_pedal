@@ -1,4 +1,5 @@
 # include "PluginProcessor.h"
+# include "PluginEditor.h"
 
 PluginProcessor::PluginProcessor()
     : juce::AudioProcessor (juce::AudioProcessor::BusesProperties()
@@ -105,7 +106,37 @@ bool PluginProcessor::isMidiEffect() const
     return false;
 }
 
+bool PluginProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+{
+    // only support mono in/out
+    if (layouts.inputBuses.size() != 1 || layouts.outputBuses.size() != 1)
+        return false;
+    
+    return layouts.getMainInputChannelSet() == juce::AudioChannelSet::mono()
+        && layouts.getMainOutputChannelSet() == juce::AudioChannelSet::mono();
+}
+
+bool PluginProcessor::hasEditor() const
+{
+    return true;
+}
+
+juce::AudioProcessorEditor* PluginProcessor::createEditor()
+{
+    return new PluginEditor(*this);
+}
+
+double PluginProcessor::getTailLengthSeconds() const
+{
+    return 0.0; // no reverb tail
+}
+
 juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createLayout()
 {
     return ODPedalParameters::createParameterLayout();
+}
+
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
+    return new PluginProcessor();
 }
