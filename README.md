@@ -10,12 +10,20 @@ A professional-quality VST3 guitar overdrive pedal plugin built with JUCE 8.x an
 - **Modular DSP design** for reuse in future pedal chain projects
 - **Production-ready structure** with clean separation of concerns
 
+## Design Principles
+
+- **DSP Decoupling:** Core algorithm in `OverdriveDSP` has zero JUCE dependencies for easy reuse
+- **Real-time Safe:** All memory allocations happen during `prepare()`, not in `process()`
+- **Automation Ready:** All parameters integrated with APVTS for DAW automation support
+- **Scalable:** Structure supports future expansion to multi-effect chain
+
 ## Build Requirements
 
-- **Windows 10+** with MSVC 2019+ or Clang
+- **Visual Studio 2026** (with C++ workload) or compatible MSVC compiler
 - **CMake 3.22+**
-- **Ninja** (for parallel builds)
 - **JUCE 8.x** (included as git submodule)
+
+**Note:** Build script uses Visual Studio 18 2026 generator. If you have a different VS version, update the `-G` flag in `build.ps1` accordingly (e.g., `"Visual Studio 17 2022"` for VS 2022).
 
 ## Building
 
@@ -26,25 +34,22 @@ git clone --recursive https://github.com/erikcompanhone/od_pedal.git
 cd od_pedal
 ```
 
-### Configure & Build
+### Build
 
-```bash
-# Configure
-cmake -S . -B build -G "Ninja Multi-Config"
+Run the build script:
 
-# Build (Release)
-cmake --build build --config Release --parallel
-
-# VST3 plugin will be at:
-# build/ODPedal.vst3/
+```powershell
+.\build.ps1
 ```
 
-## Design Principles
+Or with a specific configuration:
 
-- **DSP Decoupling:** Core algorithm in `OverdriveDSP` has zero JUCE dependencies for easy reuse
-- **Real-time Safe:** All memory allocations happen during `prepare()`, not in `process()`
-- **Automation Ready:** All parameters integrated with APVTS for DAW automation support
-- **Scalable:** Structure supports future expansion to multi-effect chain
+```powershell
+.\build.ps1 -Configuration Debug
+.\build.ps1 -Configuration Release
+```
+
+The VST3 plugin will be in `build/ODPedal_artefacts/{Configuration}/VST3/ODPedal.vst3`
 
 ## CI/CD
 

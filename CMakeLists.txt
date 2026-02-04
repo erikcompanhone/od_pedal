@@ -4,6 +4,8 @@ project(ODPedal VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_compile_definitions(JUCE_VST2_VERSIONS_DEPRECATED)
+
 add_subdirectory(third_party/JUCE)
 
 juce_add_plugin(ODPedal
@@ -12,7 +14,7 @@ juce_add_plugin(ODPedal
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
-    COPY_PLUGIN_AFTER_BUILD TRUE
+    COPY_PLUGIN_AFTER_BUILD FALSE
     PLUGIN_MANUFACTURER_CODE Ycmp
     PLUGIN_CODE Odpl
     FORMATS VST3
@@ -29,4 +31,5 @@ target_link_libraries(ODPedal PRIVATE
 target_compile_definitions(ODPedal PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
+    JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING=1
 )
