@@ -25,8 +25,8 @@ PluginEditor::PluginEditor(PluginProcessor& processorRef)
 
     toneSlider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
     toneSlider.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 60, 20);
-    toneSlider.setRange(200.0f, 8000.0f, 1.0f);
-    toneSlider.setValue(3000.0f);
+    toneSlider.setRange(800.0f, 8000.0f, 1.0f);
+    toneSlider.setValue(800.0f);
     toneSlider.setNumDecimalPlacesToDisplay(2);
     toneSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     toneSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);

@@ -5,10 +5,10 @@ OverdriveDSP::OverdriveDSP()
 {
     sampleRate = 44100.0f;
     previousTone = 0.0f;
-    inputHistory1 = 0.0f;
-    inputHistory2 = 0.0f;
-    outputHistory1 = 0.0f;
-    outputHistory2 = 0.0f;
+    lp_inputHistory1 = 0.0f;
+    lp_inputHistory2 = 0.0f;
+    lp_outputHistory1 = 0.0f;
+    lp_outputHistory2 = 0.0f;
 }
 
 // prepare the DSP with the given sample rate
@@ -17,16 +17,16 @@ void OverdriveDSP::prepare(float newSampleRate)
     sampleRate = newSampleRate;
     reset();
     updateHPFCoefficients();
-    updateToneCoefficients(3000.0f);
+    updateLPFCoefficients(3000.0f);
 }
 
 // reset the DSP state
 void OverdriveDSP::reset()
 {
-    inputHistory1 = 0.0f;
-    inputHistory2 = 0.0f;
-    outputHistory1 = 0.0f;
-    outputHistory2 = 0.0f;
+    lp_inputHistory1 = 0.0f;
+    lp_inputHistory2 = 0.0f;
+    lp_outputHistory1 = 0.0f;
+    lp_outputHistory2 = 0.0f;
     previousTone = 0.0f;
     hp_a1 = 0.0f;
     hp_a2 = 0.0f;
@@ -46,38 +46,46 @@ float OverdriveDSP::softClip(float input)
         return input - (input * input * input) / 3.0f;
 }
 
-// helper to calculate peaking EQ coefficients
-void OverdriveDSP::updateToneCoefficients(float tone)
+float OverdriveDSP::applyLPF(float input)
 {
-    // map tone parameter (200-8000 Hz) to peak frequency
-    float peakFreq = 200.0f + (tone - 200.0f) * 1.5f;  // shift toward midrange
-    if (peakFreq > 8000.0f) peakFreq = 8000.0f;
+    float output = lp_b0 * input + lp_b1 * lp_inputHistory1 + lp_b2 * lp_inputHistory2
+                   - lp_a1 * lp_outputHistory1 - lp_a2 * lp_outputHistory2;
     
-    // peaking EQ with moderate Q (sharpness) and gain (boost amount)
-    float Q = 1.0f;  // Q factor (sharpness of peak)
-    float peakGain = 6.0f;  // dB boost amount (Tube Screamer boosts mids)
+    // update history
+    lp_inputHistory2 = lp_inputHistory1;
+    lp_inputHistory1 = input;
+    lp_outputHistory2 = lp_outputHistory1;
+    lp_outputHistory1 = output;
+
+    return output;
+}
+
+// helper to update low-pass filter coefficients
+void OverdriveDSP::updateLPFCoefficients(float tone)
+{
+    float cutoffFreq = tone;  // Hz
+    float Q = 0.707f;          // Standard rolloff
     
     // biquad cookbook formulas
-    float A = std::pow(10.0f, peakGain / 40.0f);  // convert dB to linear
-    float w0 = 2.0f * 3.14159265f * peakFreq / sampleRate;
+    float w0 = 2.0f * 3.14159265f * cutoffFreq / sampleRate;
     float sinW0 = std::sin(w0);
     float cosW0 = std::cos(w0);
     float alpha = sinW0 / (2.0f * Q);
-    
-    // peaking EQ coefficients
-    b0 = 1.0f + alpha * A;
-    b1 = -2.0f * cosW0;
-    b2 = 1.0f - alpha * A;
-    a1 = -2.0f * cosW0;
-    a2 = 1.0f - alpha / A;
+        
+    // Apply LPF formulas:
+    lp_b0 = (1.0f - cosW0) / 2.0f;
+    lp_b1 = 1.0f - cosW0;
+    lp_b2 = (1.0f - cosW0) / 2.0f;
+    lp_a1 = -2.0f * cosW0;
+    lp_a2 = 1.0f - alpha;
     
     // normalize (divide by a0)
-    float a0 = 1.0f + alpha / A;
-    b0 /= a0;
-    b1 /= a0;
-    b2 /= a0;
-    a1 /= a0;
-    a2 /= a0;
+    float a0 = 1.0f + alpha;
+    lp_b0 /= a0;
+    lp_b1 /= a0;
+    lp_b2 /= a0;
+    lp_a1 /= a0;
+    lp_a2 /= a0;
 }
 
 // HPF
@@ -141,19 +149,12 @@ void OverdriveDSP::process(float* buffer, int numSamples, float drive, float ton
         float clippedSample = softClip(hpfSample);
 
         if (tone != previousTone) {
-            updateToneCoefficients(tone);
+            updateLPFCoefficients(tone);
             previousTone = tone;
         }
 
-        // biquad formula
-        float toneSample = b0 * clippedSample + b1 * inputHistory1 + b2 * inputHistory2 
-                           - a1 * outputHistory1 - a2 * outputHistory2;
-
-        // update state variables
-        inputHistory2 = inputHistory1;
-        inputHistory1 = clippedSample;
-        outputHistory2 = outputHistory1;
-        outputHistory1 = toneSample;
+        // apply LPF
+        float toneSample = applyLPF(clippedSample);
 
         // apply output level
         buffer[i] = toneSample * levelLinear;

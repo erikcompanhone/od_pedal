@@ -23,31 +23,32 @@ class OverdriveDSP
         // DSP state variables
         float sampleRate = 44100.0f;
         float previousTone = 0.0f;
-        float inputHistory1 = 0.0f;   // x[n-1]
-        float inputHistory2 = 0.0f;   // x[n-2]
-        float outputHistory1 = 0.0f;  // y[n-1]
-        float outputHistory2 = 0.0f;  // y[n-2]
+
+        // LPF
+        float lp_inputHistory1 = 0.0f;   // LPF x[n-1]
+        float lp_inputHistory2 = 0.0f;   // LPF x[n-2]
+        float lp_outputHistory1 = 0.0f;  // LPF y[n-1]
+        float lp_outputHistory2 = 0.0f;  // LPF y[n-2]
+        
+        float lp_b0 = 0.0f, lp_b1 = 0.0f, lp_b2 = 0.0f;
+        float lp_a1 = 0.0f, lp_a2 = 0.0f;
+
+        float applyLPF(float input);
+
+        void updateLPFCoefficients(float tone);
+
+        // HPF
         float hp_inputHistory1 = 0.0f;   // HPF x[n-1]
         float hp_inputHistory2 = 0.0f;   // HPF x[n-2]
         float hp_outputHistory1 = 0.0f;  // HPF y[n-1]
         float hp_outputHistory2 = 0.0f;  // HPF y[n-2]
 
-        // peaking EQ coefficients
-        float b0 = 0.0f, b1 = 0.0f, b2 = 0.0f;
-        float a1 = 0.0f, a2 = 0.0f;
-        
-        // high-pass filter coefficients
         float hp_b0 = 0.0f, hp_b1 = 0.0f, hp_b2 = 0.0f;
         float hp_a1 = 0.0f, hp_a2 = 0.0f;
 
-        // HPF
         float applyHPF(float input);
 
-        // high pass helper
         void updateHPFCoefficients();
-
-        // helper to calculate peaking EQ coefficients
-        void updateToneCoefficients(float tone);
 
         // helper function for soft clipping
         float softClip(float input);
