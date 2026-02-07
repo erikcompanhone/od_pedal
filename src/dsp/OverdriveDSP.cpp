@@ -46,14 +46,9 @@ void OverdriveDSP::reset()
 }
 
 // helper function for soft clipping
-float OverdriveDSP::softClip(float input)
+float OverdriveDSP::tanhClip(float input)
 {
-    if (input > 1.0f)
-        return (2.0f / 3.0f);
-    else if (input < -1.0f)
-        return -(2.0f / 3.0f);
-    else
-        return input - (input * input * input) / 3.0f;
+    return tanh(input);
 }
 
 float OverdriveDSP::applyLPF(float input)
@@ -198,7 +193,7 @@ void OverdriveDSP::process(float* buffer, int numSamples, float drive, float ton
         float hpfSample = applyHPF(inputSample);
 
         // soft clipping
-        float clippedSample = softClip(hpfSample);
+        float clippedSample = tanhClip(hpfSample);
 
         // post LPF
         float postLPFSample = applyPostLPF(clippedSample);

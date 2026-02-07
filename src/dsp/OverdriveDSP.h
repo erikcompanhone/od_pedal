@@ -63,6 +63,6 @@ class OverdriveDSP
 
         void updateHPFCoefficients();
 
-        // helper function for soft clipping
-        float softClip(float input);
+        // tanh clip
+        float tanhClip(float input);
 };
