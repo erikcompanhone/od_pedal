@@ -17,22 +17,32 @@ void OverdriveDSP::prepare(float newSampleRate)
     sampleRate = newSampleRate;
     reset();
     updateHPFCoefficients();
-    updateLPFCoefficients(3000.0f);
+    updatePostLPFCoefficients();
+    updateLPFCoefficients(800.0f);
 }
 
 // reset the DSP state
 void OverdriveDSP::reset()
 {
+    // HPF history
+    hp_inputHistory1 = 0.0f;
+    hp_inputHistory2 = 0.0f;
+    hp_outputHistory1 = 0.0f;
+    hp_outputHistory2 = 0.0f;
+
+    // Post-LPF history
+    postLPF_inputHistory1 = 0.0f;
+    postLPF_inputHistory2 = 0.0f;
+    postLPF_outputHistory1 = 0.0f;
+    postLPF_outputHistory2 = 0.0f;
+
+    // LPF history
     lp_inputHistory1 = 0.0f;
     lp_inputHistory2 = 0.0f;
     lp_outputHistory1 = 0.0f;
     lp_outputHistory2 = 0.0f;
+
     previousTone = 0.0f;
-    hp_a1 = 0.0f;
-    hp_a2 = 0.0f;
-    hp_b0 = 0.0f;
-    hp_b1 = 0.0f;
-    hp_b2 = 0.0f;
 }
 
 // helper function for soft clipping
@@ -58,6 +68,48 @@ float OverdriveDSP::applyLPF(float input)
     lp_outputHistory1 = output;
 
     return output;
+}
+
+// POST LPF
+float OverdriveDSP::applyPostLPF(float input)
+{
+    float output = post_b0 * input + post_b1 * postLPF_inputHistory1 + post_b2 * postLPF_inputHistory2
+                   - post_a1 * postLPF_outputHistory1 - post_a2 * postLPF_outputHistory2;
+    
+    // update history
+    postLPF_inputHistory2 = postLPF_inputHistory1;
+    postLPF_inputHistory1 = input;
+    postLPF_outputHistory2 = postLPF_outputHistory1;
+    postLPF_outputHistory1 = output;
+
+    return output;
+}
+
+// helper to update post low-pass filter coefficients
+void OverdriveDSP::updatePostLPFCoefficients()
+{
+    float cutoffFreq = 7000.0f;  // Fixed at 7 kHz
+    float Q = 0.707f;
+    
+    float w0 = 2.0f * 3.14159265f * cutoffFreq / sampleRate;
+    float sinW0 = std::sin(w0);
+    float cosW0 = std::cos(w0);
+    float alpha = sinW0 / (2.0f * Q);
+    
+    // Apply LPF formulas
+    post_b0 = (1.0f - cosW0) / 2.0f;
+    post_b1 = 1.0f - cosW0;
+    post_b2 = (1.0f - cosW0) / 2.0f;
+    post_a1 = -2.0f * cosW0;
+    post_a2 = 1.0f - alpha;
+    
+    // Normalize
+    float a0 = 1.0f + alpha;
+    post_b0 /= a0;
+    post_b1 /= a0;
+    post_b2 /= a0;
+    post_a1 /= a0;
+    post_a2 /= a0;
 }
 
 // helper to update low-pass filter coefficients
@@ -148,13 +200,16 @@ void OverdriveDSP::process(float* buffer, int numSamples, float drive, float ton
         // soft clipping
         float clippedSample = softClip(hpfSample);
 
+        // post LPF
+        float postLPFSample = applyPostLPF(clippedSample);
+
         if (tone != previousTone) {
             updateLPFCoefficients(tone);
             previousTone = tone;
         }
 
         // apply LPF
-        float toneSample = applyLPF(clippedSample);
+        float toneSample = applyLPF(postLPFSample);
 
         // apply output level
         buffer[i] = toneSample * levelLinear;

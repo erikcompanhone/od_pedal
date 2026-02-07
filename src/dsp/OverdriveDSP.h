@@ -24,6 +24,19 @@ class OverdriveDSP
         float sampleRate = 44100.0f;
         float previousTone = 0.0f;
 
+        // POST LPF
+        float postLPF_inputHistory1 = 0.0f;   // POST LPF x[n-1]
+        float postLPF_inputHistory2 = 0.0f;   // POST LPF x[n-2]
+        float postLPF_outputHistory1 = 0.0f;  // POST LPF y[n-1]
+        float postLPF_outputHistory2 = 0.0f;  // POST LPF y[n-2]
+
+        float post_b0 = 0.0f, post_b1 = 0.0f, post_b2 = 0.0f;
+        float post_a1 = 0.0f, post_a2 = 0.0f;
+
+        float applyPostLPF(float input);
+
+        void updatePostLPFCoefficients();
+
         // LPF
         float lp_inputHistory1 = 0.0f;   // LPF x[n-1]
         float lp_inputHistory2 = 0.0f;   // LPF x[n-2]
