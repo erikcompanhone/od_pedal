@@ -80,6 +80,21 @@ void OverdriveDSP::updateToneCoefficients(float tone)
     a2 /= a0;
 }
 
+// HPF
+float OverdriveDSP::applyHPF(float input)
+{
+    float output = hp_b0 * input + hp_b1 * hp_inputHistory1 + hp_b2 * hp_inputHistory2
+                   - hp_a1 * hp_outputHistory1 - hp_a2 * hp_outputHistory2;
+
+    // update history
+    hp_inputHistory2 = hp_inputHistory1;
+    hp_inputHistory1 = input;
+    hp_outputHistory2 = hp_outputHistory1;
+    hp_outputHistory1 = output;
+
+    return output;
+}
+
 // helper to update high-pass filter coefficients
 void OverdriveDSP::updateHPFCoefficients()
 {
@@ -120,14 +135,7 @@ void OverdriveDSP::process(float* buffer, int numSamples, float drive, float ton
         float inputSample = buffer[i] * driveLinear;
 
         // Apply HPF
-        float hpfSample = hp_b0 * inputSample + hp_b1 * hp_inputHistory1 + hp_b2 * hp_inputHistory2
-                        - hp_a1 * hp_outputHistory1 - hp_a2 * hp_outputHistory2;
-
-        // Update HPF history
-        hp_inputHistory2 = hp_inputHistory1;
-        hp_inputHistory1 = inputSample;
-        hp_outputHistory2 = hp_outputHistory1;
-        hp_outputHistory1 = hpfSample;
+        float hpfSample = applyHPF(inputSample);
 
         // soft clipping
         float clippedSample = softClip(hpfSample);

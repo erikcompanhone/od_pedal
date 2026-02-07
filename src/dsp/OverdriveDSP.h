@@ -40,6 +40,9 @@ class OverdriveDSP
         float hp_b0 = 0.0f, hp_b1 = 0.0f, hp_b2 = 0.0f;
         float hp_a1 = 0.0f, hp_a2 = 0.0f;
 
+        // HPF
+        float applyHPF(float input);
+
         // high pass helper
         void updateHPFCoefficients();
 
