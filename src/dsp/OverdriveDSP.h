@@ -23,6 +23,8 @@ class OverdriveDSP
         // DSP state variables
         float sampleRate = 44100.0f;
         float previousTone = 0.0f;
+        float fixedGain = 2.0f;
+        float driveExponent = 1.5f;
 
         // POST LPF
         float postLPF_inputHistory1 = 0.0f;   // POST LPF x[n-1]

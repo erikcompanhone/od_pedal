@@ -181,16 +181,19 @@ void OverdriveDSP::updateHPFCoefficients()
 void OverdriveDSP::process(float* buffer, int numSamples, float drive, float tone, float level)
 {
     // convert dB parameters to linear
-    float driveLinear = std::pow(10.0f, drive / 20.0f);
+    float driveLinear = std::pow(10.0f, (drive / 20.0f) * driveExponent);
     float levelLinear = std::pow(10.0f, level / 20.0f);
-    
+
     for (int i = 0; i < numSamples; ++i)
     {
+        // apply fixed gain
+        float inputSample = buffer[i] * fixedGain;
+
         // apply drive
-        float inputSample = buffer[i] * driveLinear;
+        float driveSample = inputSample * driveLinear;
 
         // Apply HPF
-        float hpfSample = applyHPF(inputSample);
+        float hpfSample = applyHPF(driveSample);
 
         // soft clipping
         float clippedSample = tanhClip(hpfSample);
